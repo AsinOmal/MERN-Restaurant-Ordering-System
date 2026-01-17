@@ -1,0 +1,14 @@
+node_modules/
+.env
+.DS_Store
+*.log
+coverage/
+.vscode/
+.idea/
+dist/
+build/
+
+# Private Documentation
+TECHNICAL_REPORT.md
+VIDEO_SCRIPT.md
+EVIDENCE_GUIDE.md
