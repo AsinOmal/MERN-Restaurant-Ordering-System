@@ -280,5 +280,3 @@ npm run test:watch
 # Generate coverage report
 npm test -- --coverage
 ```
-
-## License
