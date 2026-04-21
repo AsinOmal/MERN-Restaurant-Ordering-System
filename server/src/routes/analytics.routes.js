@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
 const {
   getRevenue,
   getPopularItems,
   getOrderTrends
 } = require('../controllers/analyticsController');
 
-// All routes require authentication and 'owner' role
-router.use(protect);
-router.use(authorize('owner'));
+router.use(verifyAsgardeoToken);
+router.use(authorizeRoles('owner'));
 
 router.get('/revenue', getRevenue);
 router.get('/popular-items', getPopularItems);

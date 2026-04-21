@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { getCart, addToCart, updateCartItem, removeFromCart, clearCart } = require('../controllers/cartController');
-const { protect } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken } = require('../middleware/asgardeo.middleware');
 
-router.route('/').get(protect, getCart).delete(protect, clearCart);
-router.route('/items').post(protect, addToCart);
+router.use(verifyAsgardeoToken);
+
+router.route('/').get(getCart).delete(clearCart);
+router.route('/items').post(addToCart);
 router.route('/items/:itemId')
-  .put(protect, updateCartItem)
-  .delete(protect, removeFromCart);
+  .put(updateCartItem)
+  .delete(removeFromCart);
 
 module.exports = router;

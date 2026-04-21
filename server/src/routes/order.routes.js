@@ -7,7 +7,8 @@ const {
   updateOrderStatus,
   cancelOrder,
 } = require('../controllers/orderController');
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
+router.use(verifyAsgardeoToken);
 
 /**
  * @swagger
@@ -73,8 +74,8 @@ const { protect, authorize } = require('../middleware/auth.middleware');
  *         description: Not authorized (customer only)
  */
 router.route('/')
-  .get(protect, getOrders)
-  .post(protect, authorize('customer'), createOrder);
+  .get(getOrders)
+  .post(authorizeRoles('customer'), createOrder);
 
 /**
  * @swagger
@@ -127,8 +128,8 @@ router.route('/')
  *         description: Order not found
  */
 router.route('/:id')
-  .get(protect, getOrder)
-  .delete(protect, cancelOrder);
+  .get(getOrder)
+  .delete(cancelOrder);
 
 /**
  * @swagger
@@ -164,6 +165,6 @@ router.route('/:id')
  *       404:
  *         description: Order not found
  */
-router.patch('/:id/status', protect, authorize('staff', 'admin'), updateOrderStatus);
+router.patch('/:id/status', authorizeRoles('staff', 'admin'), updateOrderStatus);
 
 module.exports = router;

@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { getUsers, getUser, updateUserRole, deleteUser } = require('../controllers/userController');
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
 
-router.get('/', protect, authorize('admin'), getUsers);
-router.get('/:id', protect, authorize('admin'), getUser);
-router.put('/:id/role', protect, authorize('admin'), updateUserRole);
-router.delete('/:id', protect, authorize('admin'), deleteUser);
+router.use(verifyAsgardeoToken);
+
+router.get('/', authorizeRoles('admin'), getUsers);
+router.get('/:id', authorizeRoles('admin'), getUser);
+router.put('/:id/role', authorizeRoles('admin'), updateUserRole);
+router.delete('/:id', authorizeRoles('admin'), deleteUser);
 
 module.exports = router;

@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken } = require('../middleware/asgardeo.middleware');
 const {
   addFavorite,
   removeFavorite,
   getFavorites
 } = require('../controllers/favoritesController');
 
-// All routes require authentication
-router.use(protect);
+router.use(verifyAsgardeoToken);
 
 router.post('/:restaurantId', addFavorite);
 router.delete('/:restaurantId', removeFavorite);

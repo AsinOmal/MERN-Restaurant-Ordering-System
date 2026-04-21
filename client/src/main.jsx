@@ -1,10 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { AsgardeoProvider } from '@asgardeo/react'
+import { asgardeoConfig } from './asgardeoConfig'
+import { AuthProvider } from './context/AuthContext'
+import { SocketProvider } from './context/SocketContext'
 import './index.css'
+import App from './App.jsx'
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <AsgardeoProvider {...asgardeoConfig}>
+      <AuthProvider>
+        <SocketProvider>
+          <App />
+        </SocketProvider>
+      </AuthProvider>
+    </AsgardeoProvider>
+  </StrictMode>,
 )

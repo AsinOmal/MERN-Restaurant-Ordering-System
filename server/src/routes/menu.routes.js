@@ -7,15 +7,15 @@ const {
   updateMenuItem,
   deleteMenuItem,
 } = require('../controllers/menuController');
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
 
 router.route('/')
   .get(getMenuItems)
-  .post(protect, authorize('staff', 'owner', 'admin'), createMenuItem);
+  .post(verifyAsgardeoToken, authorizeRoles('staff', 'owner', 'admin'), createMenuItem);
 
 router.route('/:id')
   .get(getMenuItem)
-  .put(protect, authorize('staff', 'owner', 'admin'), updateMenuItem)
-  .delete(protect, authorize('staff', 'owner', 'admin'), deleteMenuItem);
+  .put(verifyAsgardeoToken, authorizeRoles('staff', 'owner', 'admin'), updateMenuItem)
+  .delete(verifyAsgardeoToken, authorizeRoles('staff', 'owner', 'admin'), deleteMenuItem);
 
 module.exports = router;

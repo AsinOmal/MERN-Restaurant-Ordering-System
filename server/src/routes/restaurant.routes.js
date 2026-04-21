@@ -7,7 +7,7 @@ const {
   updateRestaurant,
   deleteRestaurant,
 } = require('../controllers/restaurantController');
-const { protect, authorize } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
 
 /**
  * @swagger
@@ -63,7 +63,7 @@ const { protect, authorize } = require('../middleware/auth.middleware');
  */
 router.route('/')
   .get(getRestaurants)
-  .post(protect, authorize('owner', 'admin'), createRestaurant);
+  .post(verifyAsgardeoToken, authorizeRoles('owner', 'admin'), createRestaurant);
 
 /**
  * @swagger
@@ -141,7 +141,7 @@ router.route('/')
  */
 router.route('/:id')
   .get(getRestaurant)
-  .put(protect, authorize('owner', 'admin'), updateRestaurant)
-  .delete(protect, authorize('owner', 'admin'), deleteRestaurant);
+  .put(verifyAsgardeoToken, authorizeRoles('owner', 'admin'), updateRestaurant)
+  .delete(verifyAsgardeoToken, authorizeRoles('owner', 'admin'), deleteRestaurant);
 
 module.exports = router;

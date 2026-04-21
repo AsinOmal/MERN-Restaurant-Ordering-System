@@ -1,0 +1,7 @@
+version: 0.1
+endpoints:
+  - name: restaurant-api
+    port: 5001
+    type: REST
+    networkVisibility: Public
+    context: /api

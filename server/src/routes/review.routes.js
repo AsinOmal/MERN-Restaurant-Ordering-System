@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { getReviews, createReview, updateReview, deleteReview } = require('../controllers/reviewController');
-const { protect } = require('../middleware/auth.middleware');
+const { verifyAsgardeoToken } = require('../middleware/asgardeo.middleware');
 
-router.route('/').get(getReviews).post(protect, createReview);
-router.route('/:id').put(protect, updateReview).delete(protect, deleteReview);
+router.route('/').get(getReviews).post(verifyAsgardeoToken, createReview);
+router.route('/:id').put(verifyAsgardeoToken, updateReview).delete(verifyAsgardeoToken, deleteReview);
 
 module.exports = router;
