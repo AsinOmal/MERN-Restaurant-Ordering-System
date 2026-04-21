@@ -2,281 +2,221 @@
 
 # Restaurant/Takeaway Ordering System
 
-Full-stack web application for restaurant ordering and takeaway services with real-time order tracking.
+Full-stack web application for restaurant ordering and takeaway services with real-time order tracking, deployed on WSO2 Choreo with Asgardeo identity management.
 
 ## Features
 
-- 🍕 Browse restaurants and menus
-- 🛒 Shopping cart functionality
-- 📦 Real-time order tracking with WebSockets
-- 🚗 Live delivery tracking
-- ⭐ Restaurant reviews and ratings
-- 🔐 JWT authentication with role-based access control
-- 👥 Multi-user support (Customer, Staff, Driver, Owner, Admin)
+- Browse restaurants and menus
+- Shopping cart functionality
+- Real-time order tracking with WebSockets
+- Live delivery tracking
+- Restaurant reviews and ratings
+- Asgardeo-powered authentication with role-based access control
+- Multi-user support (Customer, Staff, Driver, Owner, Admin)
 
 ## Tech Stack
 
 **Frontend:**
-
-- HTML5, CSS3, JavaScript (ES6+)
+- React 19 + Vite
+- React Router v7
+- Axios
 - Socket.io Client
+- Asgardeo React SDK (`@asgardeo/react`)
 
 **Backend:**
-
 - Node.js + Express.js
-- MongoDB + Mongoose
+- MongoDB + Mongoose (MongoDB Atlas)
 - Socket.io for real-time features
-- JWT for authentication
-- bcrypt for password hashing
+- Asgardeo / WSO2 Identity Server (RS256 JWT via JWKS)
+- `jwks-rsa` for token verification
 
-## Installation
+**Deployment:**
+- WSO2 Choreo (backend + frontend components)
+- MongoDB Atlas (database)
+
+## Authentication
+
+Authentication is handled by [Asgardeo by WSO2](https://wso2.com/asgardeo/). Clicking **Login** redirects to Asgardeo's hosted login page. On sign-in, the Asgardeo access token is stored in `localStorage` and attached to all API requests. The backend verifies tokens using Asgardeo's JWKS endpoint — no passwords are stored in the application database.
+
+User roles are read from the `http://wso2.org/claims/groups` claim in the JWT.
+
+## Local Development Setup
 
 ### Prerequisites
 
 - Node.js (v18+)
-- MongoDB
-- Docker & Docker Compose (optional, for containerized setup)
+- MongoDB Atlas account (or local MongoDB)
 
-### Setup Options
-
-You can run this application in two ways:
-
-1. **Using Docker** (Recommended - fastest setup)
-2. **Manual Setup** (Traditional development setup)
-
----
-
-### Option 1: Docker Setup (Recommended)
-
-The easiest way to run the application is using Docker Compose, which handles all dependencies automatically.
-
-#### Quick Start with Docker
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/Plymouth-University/coursework-group-88-1.git
-cd coursework-group-88-1
-```
-
-2. Build and start all services
-
-```bash
-docker-compose up --build
-```
-
-This single command will:
-
-- Build the client and server Docker images
-- Start MongoDB container
-- Start the backend server on `http://localhost:5001`
-- Start the frontend client on `http://localhost:5173`
-- Set up networking between all services
-
-#### Docker Commands
-
-```bash
-# Start services in detached mode (background)
-docker-compose up -d
-
-# Stop all services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# View logs for specific service
-docker-compose logs -f server
-docker-compose logs -f client
-
-# Rebuild and restart after code changes
-docker-compose up --build
-
-# Stop and remove all containers, networks, and volumes
-docker-compose down -v
-
-# Run database seeding
-docker-compose exec server npm run seed
-
-# Access server container shell
-docker-compose exec server sh
-
-# Access MongoDB shell
-docker-compose exec mongo mongosh
-```
-
-#### Environment Variables for Docker
-
-Docker Compose uses the following default configuration:
-
-- MongoDB: `mongodb://mongo:27017/restaurant-ordering`
-- Backend Port: `5001`
-- Frontend Port: `5173`
-
-To customize, create a `.env` file in the root directory.
-
-📘 **For detailed Docker documentation, see [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) and [DOCKER_QUICKSTART.md](./DOCKER_QUICKSTART.md)**
-
----
-
-### Option 2: Manual Setup
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/Plymouth-University/coursework-group-88-1.git
-cd coursework-group-88-1
-```
-
-2. Install backend dependencies
+### Backend
 
 ```bash
 cd server
 npm install
-```
-
-3. Configure environment variables
-
-```bash
 cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. Start MongoDB
-
-```bash
-# macOS (using Homebrew)
-brew services start mongodb-community
-
-# Or manually
-mongod --dbpath ~/data/db
-```
-
-5. Seed the database (optional)
-
-```bash
-npm run seed
-```
-
-6. Run the server
-
-```bash
+# Fill in your values in .env
 npm run dev
 ```
 
-Server will run on http://localhost:5001
+Server runs on `http://localhost:5001`
 
-7. Install and run frontend (in a new terminal)
+### Frontend
 
 ```bash
 cd client
 npm install
+# Create client/.env.local with your Asgardeo config (see below)
 npm run dev
 ```
 
-Frontend will run on http://localhost:5173
+Frontend runs on `http://localhost:5173`
+
+### Environment Variables
+
+**`server/.env`**
+```
+PORT=5001
+NODE_ENV=development
+MONGODB_URI=your-mongodb-atlas-uri
+JWT_SECRET=your-jwt-secret
+JWT_EXPIRE=7d
+CLIENT_URL=http://localhost:5173
+ASGARDEO_ORG_NAME=your-asgardeo-org-name
+```
+
+**`client/.env.local`**
+```
+VITE_ASGARDEO_CLIENT_ID=your-asgardeo-client-id
+VITE_ASGARDEO_ORG_NAME=your-asgardeo-org-name
+VITE_SIGN_IN_REDIRECT_URL=http://localhost:5173
+VITE_SIGN_OUT_REDIRECT_URL=http://localhost:5173
+# Uncomment for Choreo deployment:
+# VITE_API_BASE_URL=https://your-choreo-api-url/api
+```
+
+### Seed the Database
+
+Run once to populate restaurants, menu items, and sample users:
+
+```bash
+cd server
+npm run seed
+```
+
+Data persists in MongoDB Atlas — only re-run if you want to reset to defaults (this wipes existing data).
+
+## Deployment (WSO2 Choreo)
+
+1. Push this repo to GitHub
+2. Connect the repo in [Choreo Console](https://console.choreo.dev)
+3. Create two components: one for `server/` (NodeJS), one for `client/` (React)
+4. Set environment variables in Choreo for each component (same as above)
+5. The `server/.choreo/component.yaml` configures the backend REST endpoint automatically
+
+## Docker Setup
+
+```bash
+# Build and start all services
+docker-compose up --build
+
+# Run in background
+docker-compose up -d
+
+# Seed database via Docker
+docker-compose exec server npm run seed
+
+# Stop all services
+docker-compose down
+```
+
+📘 See [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) for full Docker documentation.
 
 ## API Endpoints
 
-### Authentication
-
-- POST `/api/auth/register` - Register new user
-- POST `/api/auth/login` - User login
-- GET `/api/auth/me` - Get current user
-- PUT `/api/auth/profile` - Update profile
+All protected endpoints require an Asgardeo Bearer token.
 
 ### Restaurants
-
-- GET `/api/restaurants` - Get all restaurants
-- GET `/api/restaurants/:id` - Get restaurant details
-- POST `/api/restaurants` - Create restaurant (owner/admin)
-- PUT `/api/restaurants/:id` - Update restaurant
-- DELETE `/api/restaurants/:id` - Delete restaurant
+- `GET /api/restaurants` — List all restaurants (public)
+- `GET /api/restaurants/:id` — Restaurant details (public)
+- `POST /api/restaurants` — Create restaurant (owner/admin)
+- `PUT /api/restaurants/:id` — Update restaurant (owner/admin)
+- `DELETE /api/restaurants/:id` — Delete restaurant (owner/admin)
 
 ### Menu
-
-- GET `/api/menu` - Get menu items
-- POST `/api/menu` - Create menu item (staff/owner/admin)
-- PUT `/api/menu/:id` - Update menu item
-- DELETE `/api/menu/:id` - Delete menu item
+- `GET /api/menu` — Get menu items (public)
+- `POST /api/menu` — Create menu item (staff/owner/admin)
+- `PUT /api/menu/:id` — Update menu item (staff/owner/admin)
+- `DELETE /api/menu/:id` — Delete menu item (staff/owner/admin)
 
 ### Orders
-
-- GET `/api/orders` - Get user orders
-- POST `/api/orders` - Create new order
-- GET `/api/orders/:id` - Get order details
-- PATCH `/api/orders/:id/status` - Update order status (staff)
-- DELETE `/api/orders/:id` - Cancel order
+- `GET /api/orders` — Get user orders
+- `POST /api/orders` — Create order (customer)
+- `GET /api/orders/:id` — Order details
+- `PATCH /api/orders/:id/status` — Update status (staff/admin)
+- `DELETE /api/orders/:id` — Cancel order
 
 ### Cart
-
-- GET `/api/cart` - Get user's cart
-- POST `/api/cart/items` - Add item to cart
-- PUT `/api/cart/items/:itemId` - Update cart item
-- DELETE `/api/cart/items/:itemId` - Remove from cart
-- DELETE `/api/cart` - Clear cart
+- `GET /api/cart` — Get cart
+- `POST /api/cart/items` — Add item
+- `PUT /api/cart/items/:itemId` — Update item
+- `DELETE /api/cart/items/:itemId` — Remove item
+- `DELETE /api/cart` — Clear cart
 
 ### Deliveries
-
-- GET `/api/deliveries` - Get deliveries
-- POST `/api/deliveries` - Create delivery (staff)
-- PATCH `/api/deliveries/:id/status` - Update delivery status
-- PATCH `/api/deliveries/:id/location` - Update driver location
+- `GET /api/deliveries` — Get deliveries
+- `POST /api/deliveries` — Create delivery (staff/admin)
+- `PATCH /api/deliveries/:id/status` — Update status (driver/staff/admin)
+- `PATCH /api/deliveries/:id/location` — Update driver location (driver)
 
 ### Reviews
-
-- GET `/api/reviews` - Get reviews
-- POST `/api/reviews` - Create review
-- PUT `/api/reviews/:id` - Update review
-- DELETE `/api/reviews/:id` - Delete review
+- `GET /api/reviews` — Get reviews (public)
+- `POST /api/reviews` — Create review
+- `PUT /api/reviews/:id` — Update review
+- `DELETE /api/reviews/:id` — Delete review
 
 ## WebSocket Events
 
 ### Order Events
-
-- `order:new` - New order notification (to restaurant)
-- `order:status_update` - Order status change (to customer)
-- `order:track` - Start tracking order
-- `order:stop_track` - Stop tracking order
+- `order:track` / `order:stop_track` — Subscribe/unsubscribe to order updates
+- `order:new` — New order notification (restaurant)
+- `order:status_update` — Status change (customer)
 
 ### Delivery Events
-
-- `delivery:status_update` - Delivery status change
-- `delivery:location_update` - Real-time driver location
-- `delivery:track` - Start tracking delivery
-- `delivery:stop_track` - Stop tracking delivery
-
-## Project Structure
-
-```
-restaurant-ordering-system/
-├── client/                 # Frontend application
-│   └── public/
-│       ├── index.html
-│       ├── css/
-│       └── js/
-└── server/                 # Backend application
-    ├── src/
-    │   ├── config/        # Configuration files
-    │   ├── models/        # Mongoose models (8 entities)
-    │   ├── controllers/   # Route controllers
-    │   ├── routes/        # API routes
-    │   ├── middleware/    # Custom middleware
-    │   ├── sockets/       # WebSocket handlers
-    │   ├── app.js         # Express app setup
-    │   └── server.js      # Server entry point
-    └── tests/             # Test files
-```
+- `delivery:track` / `delivery:stop_track` — Subscribe/unsubscribe to delivery updates
+- `delivery:location_update` — Real-time driver location
+- `delivery:status_update` — Delivery status change
 
 ## Testing
 
 ```bash
-# Run all tests
+cd server
+
+# Run unit tests with coverage
 npm test
 
-# Run tests in watch mode
+# Watch mode
 npm run test:watch
+```
 
-# Generate coverage report
-npm test -- --coverage
+## Project Structure
+
+```
+├── client/                  # React frontend (Vite)
+│   ├── src/
+│   │   ├── context/         # AuthContext (Asgardeo), SocketContext
+│   │   ├── pages/           # Route-level components
+│   │   ├── components/      # Shared UI components
+│   │   ├── services/        # Axios API layer
+│   │   └── asgardeoConfig.js
+│   └── .choreo/
+└── server/                  # Express backend
+    ├── src/
+    │   ├── controllers/
+    │   ├── middleware/       # asgardeo.middleware.js, auth.middleware.js
+    │   ├── models/          # 8 Mongoose schemas
+    │   ├── routes/
+    │   ├── sockets/
+    │   └── config/
+    ├── tests/
+    ├── seed.js
+    └── .choreo/component.yaml
 ```
