@@ -14,7 +14,7 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isAuthenticated() && user) {
-            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+            const apiBaseUrl = window.env?.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
             const newSocket = io(apiBaseUrl, {
                 auth: {
                     token: localStorage.getItem('asgardeo_token') || localStorage.getItem('auth_token')
