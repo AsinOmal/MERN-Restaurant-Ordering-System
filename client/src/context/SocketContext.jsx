@@ -14,9 +14,11 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         if (isAuthenticated() && user) {
-            const newSocket = io('http://localhost:5001', {
-                withCredentials: true,
-                transports: ['websocket', 'polling']
+            const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001';
+            const newSocket = io(apiBaseUrl, {
+                auth: {
+                    token: localStorage.getItem('asgardeo_token') || localStorage.getItem('auth_token')
+                }
             });
 
             newSocket.on('connect', () => {

@@ -14,11 +14,17 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email'],
   },
+  // Optional: only set for local (email+password) accounts
   password: {
     type: String,
-    required: [true, 'Please provide a password'],
     minlength: 8,
     select: false,
+  },
+  // Optional: set for Asgardeo SSO accounts
+  asgardeoSub: {
+    type: String,
+    unique: true,
+    sparse: true, // allows multiple null values
   },
   role: {
     type: String,
@@ -27,7 +33,6 @@ const userSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-    required: [true, 'Please provide a phone number'],
   },
   address: {
     street: String,

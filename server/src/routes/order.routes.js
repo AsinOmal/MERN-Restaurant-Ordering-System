@@ -7,8 +7,8 @@ const {
   updateOrderStatus,
   cancelOrder,
 } = require('../controllers/orderController');
-const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
-router.use(verifyAsgardeoToken);
+const { protect, authorize } = require('../middleware/protect.middleware');
+router.use(protect);
 
 /**
  * @swagger
@@ -75,7 +75,7 @@ router.use(verifyAsgardeoToken);
  */
 router.route('/')
   .get(getOrders)
-  .post(authorizeRoles('customer'), createOrder);
+  .post(authorize('customer'), createOrder);
 
 /**
  * @swagger
@@ -154,7 +154,7 @@ router.route('/:id')
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [pending, confirmed, preparing, ready, out_for_delivery, delivered, cancelled]
+ *                 enum: [pending, confirmed, preparing, ready, out-for-delivery, delivered, cancelled]
  *     responses:
  *       200:
  *         description: Order status updated
@@ -165,6 +165,6 @@ router.route('/:id')
  *       404:
  *         description: Order not found
  */
-router.patch('/:id/status', authorizeRoles('staff', 'admin'), updateOrderStatus);
+router.patch('/:id/status', authorize('staff', 'owner', 'admin'), updateOrderStatus);
 
 module.exports = router;

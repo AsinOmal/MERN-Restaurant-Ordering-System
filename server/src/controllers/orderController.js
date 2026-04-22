@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const MenuItem = require('../models/MenuItem');
 
 // @desc    Get orders
 // @route   GET /api/orders
@@ -58,8 +59,26 @@ exports.createOrder = async (req, res) => {
   try {
     req.body.customer = req.user.id;
 
-    // Calculate total (simplified - should validate with menu prices)
-    const subtotal = req.body.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Fetch items from database to get secure prices
+    const itemIds = req.body.items.map(item => item.menuItem);
+    const menuItems = await MenuItem.find({ _id: { $in: itemIds } });
+
+    if (menuItems.length !== itemIds.length) {
+      return res.status(400).json({ success: false, message: 'One or more menu items not found' });
+    }
+
+    // Map secure prices to the items array and calculate subtotal
+    let subtotal = 0;
+    req.body.items = req.body.items.map(reqItem => {
+      const dbItem = menuItems.find(m => m._id.toString() === reqItem.menuItem.toString());
+      subtotal += (dbItem.price * reqItem.quantity);
+      return {
+        ...reqItem,
+        price: dbItem.price,
+        name: dbItem.name
+      };
+    });
+
     req.body.subtotal = subtotal;
     req.body.tax = subtotal * 0.1; // 10% tax
     req.body.deliveryFee = 5; // Fixed delivery fee

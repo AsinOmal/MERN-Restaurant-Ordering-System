@@ -50,7 +50,9 @@ const OwnerDashboard = () => {
         try {
             const restsResponse = await restaurantAPI.getAll();
             // Filter for owned restaurants if API returns all
-            const myRests = restsResponse.data.data.filter(r => r.owner?._id === user._id || r.owner === user._id);
+            const myRests = restsResponse.data.data.filter(r => 
+                String(r.owner?._id || r.owner) === String(user._id)
+            );
             setMyRestaurants(myRests);
 
             if (myRests.length > 0) {
@@ -72,13 +74,12 @@ const OwnerDashboard = () => {
         try {
             const [menuResp, ordersResp] = await Promise.all([
                 menuAPI.getAll({ restaurant: restaurantId }),
-                orderAPI.getAll()
+                orderAPI.getAll({ restaurant: restaurantId })
             ]);
 
             setMenuItems(menuResp.data.data);
 
-            // Filter orders for this restaurant
-            const restOrders = ordersResp.data.data.filter(o => o.restaurant?._id === restaurantId);
+            const restOrders = ordersResp.data.data;
             setOrders(restOrders);
 
             // Calculate basic stats
@@ -136,6 +137,24 @@ const OwnerDashboard = () => {
             await loadRestaurantData(selectedRestaurant._id);
         } catch (err) {
             alert('Failed to delete item');
+        }
+    };
+
+    const handleUpdateRestaurant = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await restaurantAPI.update(selectedRestaurant._id, restaurantFormData);
+            setSelectedRestaurant(res.data.data);
+            setEditMode(false);
+            // Refresh list
+            const restsResponse = await restaurantAPI.getAll();
+            const myRests = restsResponse.data.data.filter(r => 
+                String(r.owner?._id || r.owner) === String(user._id)
+            );
+            setMyRestaurants(myRests);
+        } catch (err) {
+            alert('Failed to update restaurant details');
+            console.error(err);
         }
     };
 
@@ -324,9 +343,9 @@ const OwnerDashboard = () => {
                 <div className="menu-items-grid">
                     {filteredMenuItems.map(item => (
                         <div key={item._id} className="menu-item-card">
-                            {item.image && (
+                            {item.images && item.images.length > 0 && (
                                 <div className="item-image-preview">
-                                    <img src={item.image} alt={item.name} />
+                                    <img src={item.images[0]} alt={item.name} />
                                 </div>
                             )}
                             <div className="item-content">

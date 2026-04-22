@@ -115,7 +115,7 @@ const Menu = () => {
     // Helper to get image based on item content
     const getItemImage = (item) => {
         // If exact image exists, return it (assuming URL or path)
-        if (item.image) return item.image;
+        if (item.images && item.images.length > 0) return item.images[0];
 
         // Fallback logic
         const cat = item.category.toLowerCase();

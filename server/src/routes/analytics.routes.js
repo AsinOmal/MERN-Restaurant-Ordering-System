@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const { verifyAsgardeoToken, authorizeRoles } = require('../middleware/asgardeo.middleware');
+const { protect, authorize } = require('../middleware/protect.middleware');
 const {
   getRevenue,
   getPopularItems,
   getOrderTrends
 } = require('../controllers/analyticsController');
 
-router.use(verifyAsgardeoToken);
-router.use(authorizeRoles('owner'));
+router.use(protect);
+router.use(authorize('owner', 'admin'));
 
 router.get('/revenue', getRevenue);
 router.get('/popular-items', getPopularItems);

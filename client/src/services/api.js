@@ -11,7 +11,10 @@ const api = axios.create({
 
 // Add auth token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('asgardeo_token');
+  const localToken = localStorage.getItem('auth_token');
+  const asgardeoToken = localStorage.getItem('asgardeo_token');
+  const token = asgardeoToken || localToken;
+  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

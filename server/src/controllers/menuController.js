@@ -1,4 +1,5 @@
 const MenuItem = require('../models/MenuItem');
+const Restaurant = require('../models/Restaurant');
 
 // @desc    Get menu items
 // @route   GET /api/menu
@@ -42,6 +43,16 @@ exports.getMenuItem = async (req, res) => {
 // @access  Private (staff, owner, admin)
 exports.createMenuItem = async (req, res) => {
   try {
+    const restaurant = await Restaurant.findById(req.body.restaurant);
+    if (!restaurant) {
+      return res.status(404).json({ success: false, message: 'Restaurant not found' });
+    }
+
+    // Verify ownership
+    if (req.user.role !== 'admin' && restaurant.owner.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to add items to this restaurant' });
+    }
+
     const menuItem = await MenuItem.create(req.body);
 
     res.status(201).json({ success: true, data: menuItem });

@@ -69,8 +69,6 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes
-// Serve static files
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Mount routes
 app.use('/api/auth', require('./routes/auth.routes'));
