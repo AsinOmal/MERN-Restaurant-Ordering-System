@@ -67,7 +67,7 @@ const Login = () => {
                                 style={{ padding: '0.85rem', marginBottom: '1.5rem', backgroundColor: '#FF7043', border: 'none' }}
                             >
                                 <i className="fas fa-user" style={{ marginRight: '0.5rem' }}></i>
-                                Customer Sign in (Asgardeo)
+                                Customer Sign in
                             </button>
                         </div>
                         
